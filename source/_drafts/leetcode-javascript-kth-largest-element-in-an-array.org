@@ -1,0 +1,31 @@
+#+TITLE: [Leetcode-Javascript]Kth Largest Element in an Array
+#+DATE: <2015-11-23 一 22:11>
+#+LAYOUT: post
+#+TAGS: leetcode
+#+CATEGORIES: LEETCODE
+
+* 题目
+
+** 原题
+#+BEGIN_QUOTE
+Find the kth largest element in an unsorted array. Note that it is the kth largest element in the sorted order, not the kth distinct element.
+
+For example,
+Given [3,2,1,5,6,4] and k = 2, return 5.
+
+Note:
+You may assume k is always valid, 1 ≤ k ≤ array's length.
+#+END_QUOTE
+
+** 大意
+在无序数组中找出第 k 大的数字。
+
+* 分析
+
+最简单的方法自然是直接排序好，然后取第 k 个数，这样效率自然不会太高。由于我们只是需要找到第 k 大的数字，所以不需要对所有的数字进行排序，我们可以用类似快速排序的算法找到这个数。
+
+首先选取一个数，将比其小的放到左边，大的放到右边。记此时该数是第 x 个。
+
++ ~x == k~ 时他就是第 k 大的数字
++ ~x < k~ 时第 k 大的数字在右边
++ ~x > k~ 时第 k 大的数字在左边

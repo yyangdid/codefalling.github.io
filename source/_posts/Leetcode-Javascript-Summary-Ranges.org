@@ -1,0 +1,57 @@
+#+TITLE: [Leetcode-Javascript]Summary Ranges
+#+DATE: <2015-10-31 Sat 20:18>
+#+TAGS: leetcode
+#+LAYOUT: post
+#+CATEGORIES: LEETCODE
+* 原题
+
+#+BEGIN_QUOTE
+Given a sorted integer array without duplicates, return the summary of its ranges.
+
+For example, given [0,1,2,4,5,7], return ["0->2","4->5","7"].
+#+END_QUOTE
+
+就是将数组中 0,1,2 这样的 +1 递增部分换成 =0->2= 这样的表示。
+
+* 分析
+
+这道题的等级是 easy，也确实十分简单，只要在遍历数组的时候检查是否递增，过程中记住递增的首尾，最后记成 =m->n= 这样的形式即可。
+
+简单的边界条件直接处理。
+
+#+BEGIN_HTML
+<!--more-->
+#+END_HTML
+
+* 代码
+
+#+BEGIN_SRC js
+  /**
+   ,* @param {number[]} nums
+   ,* @return {string[]}
+   ,*/
+  var summaryRanges = function(nums) {
+      var result = [];
+      if (nums.length === 0) return [];
+      if (nums.length == 1) return [nums[0].toString()];
+      for (var i = 0; i < nums.length; i++) {
+          var rangeBegin = nums[i];
+          var rangeEnd = nums[i];
+          do {
+              i++;
+              if (nums[i] == rangeEnd + 1) {
+                  rangeEnd = nums[i];
+              } else {
+                  i--;
+                  break;
+              }
+          } while (i < nums.length);
+          if (rangeEnd != rangeBegin) {
+              result.push(rangeBegin + "->" + rangeEnd);
+          } else {
+              result.push(rangeBegin.toString());
+          }
+      }
+      return result;
+  };
+#+END_SRC

@@ -1,0 +1,63 @@
+#+TITLE: [Leetcode-Javascript]Rectangle Area
+#+DATE: <2015-11-05 Thu 18:00>
+#+TAGS: leetcode
+#+LAYOUT: post
+#+CATEGORIES: LEETCODE
+
+
+* 原题
+Find the total area covered by two rectilinear rectangles in a 2D plane.
+
+Each rectangle is defined by its bottom left corner and top right corner as shown in the figure.
+
+[[https://leetcode.com/static/images/problemset/rectangle_area.png][example]]
+
+Rectangle Area
+Assume that the total area is never beyond the maximum possible value of int.
+
+** 翻译
+计算被两个长方形覆盖的面积，假设结果不会溢出。
+
+* 分析
+这道题的顶级是 =Easy= ，但是相对之前有题 =Medium= 的难度：[[http://codefalling.com/2015/11/01/Leetcode-Javascript-Find-Peak-Element/][{Leetcode-Javascript}Find Peak Element | M-x codefalling]] ,这道题至少还是要思考一下的，不然容易漏掉一些情况。
+
+直接看题图，这道题让求总覆盖面积，其实就是两个矩形的面积之和减掉重复部位的面积。重复部位的面积容易求，用 =两个矩形的高度之和 - 两个矩形合并后的高度（y 值最大值 - y 值最小值）= 就可以得到其高，同理也容易得到宽。
+
+但是容易忽略的是，可能两个矩形是完全不重合的，这样就会出现上面的计算方法得到的结果为负值（两个矩形高加起来中间还有空白），只要排除掉这种情况，将高（宽）置为零即可。
+
+#+BEGIN_HTML
+<!--more-->
+#+END_HTML
+
+* 代码
+
+#+BEGIN_SRC js
+  /**
+   ,* @param {number} A
+   ,* @param {number} B
+   ,* @param {number} C
+   ,* @param {number} D
+   ,* @param {number} E
+   ,* @param {number} F
+   ,* @param {number} G
+   ,* @param {number} H
+   ,* @return {number}
+   ,*/
+
+  var computeArea = function(A, B, C, D, E, F, G, H) {
+    var r1_h = D - B;
+    var r1_w = C - A;
+    var r2_h = H - F;
+    var r2_w = G - E;
+    var merge_h = Math.max(B, D, F, H) - Math.min(B, D, F, H); // 重合部分的高度
+    var merge_w = Math.max(A, C, E, G) - Math.min(A, C, E, G);
+    var duplicate_h = (r1_h + r2_h) - merge_h;
+    var duplicate_w = (r1_w + r2_w) - merge_w;
+    if(duplicate_h < 0 || duplicate_w < 0){ // 完全不重合
+      duplicate_h = 0;
+      duplicate_w = 0;
+    }
+    return r1_h * r1_w + r2_h * r2_w - duplicate_h * duplicate_w;
+  };
+#+END_SRC
+

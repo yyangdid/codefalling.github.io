@@ -1,0 +1,87 @@
+#+TITLE: 摆脱 hexo-front-matter
+#+DATE: <2015-11-16 Mon 22:12>
+#+LAYOUT: post
+#+TAGS: emacs,hexo,org-mode,hexo-renderer-org
+#+CATEGORIES: EMACS
+
+* hexo-front-matter
+
+~hexo~ 就不需要再介绍了，是个很有名的静态博客生成器。和很多静态博客生成器一样，hexo 选择 ~front-matter~ 来读取文章的元数据，例如标题，日期等，究其原因是因为 ~markdown~ 没有办法表示这些信息。我们经常可以在各种文章的头部看到它们
+
+虽然这种方式有所争议（因为这样就不是一个标准的 md 文件了），但是对于 md 没有更好的选择，相关的文档和讨论在 [[https://hexo.io/docs/front-matter.html][Front-matter | Hexo]] 可以看到。所以终究 hexo 直接使用了这种方式。
+
+* orgmode 不需要 front-matter
+
+~orgmode~ 不同于追求简洁的 ~markdown~ ，本身就有表示文章元信息的方式，一个典型的 ~orgmode~ 文章可以这样表示
+
+#+BEGIN_EXAMPLE
+  ,#+TITLE: hexo：摆脱 hexo-front-matter
+  ,#+DATE: <2015-11-16 Mon 22:12>
+  ,#+LAYOUT: post
+  ,#+TAGS: emacs,hexo,org-mode,hexo-renderer-org
+  ,#+CATEGORIES: EMACS
+  文章内容
+#+END_EXAMPLE
+
+但是 hexo 从一开始就没考虑过这个问题，所以并没有提供改变读取元信息的接口，但是我研究了一段时间后发现一些 hack 可以做到。
+
+#+BEGIN_HTML
+<!--more-->
+#+END_HTML
+
+* hack
+** hexo.extend.filter.register
+
+~hexo~ 提供了插件的 API 可以在渲染前/后再对结果做一些处理。
+
+通过
+#+BEGIN_SRC js
+  hexo.extend.filter.register('before_post_render', function(data){
+    console.log(data)
+    return data;
+  });
+#+END_SRC
+
+把 ~data~ 打印出来可以看到 ~title~ ~tags~ ~content~ ，可以通过 ~content~ 读取元信息，然后再写回 ~data~ 里。
+
+** DateTime
+
+~Orgmode~ 中使用 ~org-time-stamp~ 来插入时间戳，结果类似 ~<2015-11-16 Mon 22:40>~ （似乎可以配置成其他格式和中文等），只要把非数字和 ~:-~ 替换成空格就能被 ~Date.parse~ 直接识别。
+
+#+BEGIN_SRC js
+new Date(Date.parse(org_time.replace(/[^0-9:-]/g, ' ')))
+#+END_SRC
+
+除此之外， ~hexo~ 需要一个 ~format~ 函数来调用[fn::hexo 表示时间的类型不是 Date，而是 [[https://github.com/hexojs/hexo/blob/534102e6992bfb4df975a724846993617edcf988/lib/models/types/moment.js][hexo/moment.js at 534102e6992bfb4df975a724846993617edcf988 · hexojs/hexo]]]。
+
+#+BEGIN_SRC js
+  if (!Date.prototype.format) {
+    Date.prototype.format = function(fmt) { // Hexo need this
+      var o = {
+        "M+": this.getMonth() + 1,
+        "d+": this.getDate(),
+        "h+": this.getHours(),
+        "m+": this.getMinutes(),
+        "s+": this.getSeconds(),
+        "q+": Math.floor((this.getMonth() + 3) / 3),
+        "S": this.getMilliseconds()
+      };
+      if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+      for (var k in o)
+        if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+      return fmt;
+    };
+  }
+#+END_SRC
+
+** tags 和 categories
+
+这是最头疼的两个属性了，它们不能直接设置，但是我在 [[https://github.com/hexojs/hexo/blob/b4172d6c15fc9782b6b522f65e9c202ff548dcc7/lib/models/post.js][hexo/post.js at b4172d6c15fc9782b6b522f65e9c202ff548dcc7 · hexojs/hexo]] 中找到了一些信息。我们可以用类似 ~data.setTags(['tag1', 'tag2'])~ 这样的方法改变文章的 tag。
+
+* 问题
+
+tag 的统计数据比预期大很多，似乎是重复的会叠加次数，原因不详。
+
+* 实现
+
+目前在 [[https://github.com/CodeFalling/hexo-renderer-org][CodeFalling/hexo-renderer-org]] 中已经实现了这个方法，以后可以直接用 ~orgmode~ 的写法，摆脱作为权益之计的 ~front-matter~ 。

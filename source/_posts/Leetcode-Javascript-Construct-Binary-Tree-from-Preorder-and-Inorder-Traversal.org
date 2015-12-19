@@ -1,0 +1,130 @@
+#+TITLE: [Leetcode,Javascript]Construct Binary Tree from Preorder and Inorder Traversal
+#+DATE: <2015-10-30 Fri 18:52>
+#+TAGS: leetcode
+#+LAYOUT: post
+#+CATEGORIES: LEETCODE
+
+* 题目
+#+BEGIN_QUOTE
+Given preorder and inorder traversal of a tree, construct the binary tree.
+Note:
+You may assume that duplicates do not exist in the tree.
+#+END_QUOTE
+
+就是根据前序遍历和中序遍历来构建一个二叉树。
+
+* 分析
+
+这其实是个在数据结构考试中很常见的题目，看起来似乎毫无头绪，但是只要画出一颗树其实很容易分析。[fn::这张 ascii 图是使用 [[https://github.com/msbanik/drawtree][一个名为 drawtree 的 python 库]] 画的。]]
+
+#+BEGIN_EXAMPLE
+    1
+   / \
+  /   \
+ /     \
+2       3
+ \     /
+  4   5
+#+END_EXAMPLE
+
+可以看到，它的前序遍历和中序遍历分别为 12435 和 24153，很明显前序遍历的开头一定是跟节点，而中序遍历中根节点将左右分成左右子树。我们只需用递归的思路来构建（子）树即可。
+
+#+BEGIN_HTML
+<!--more-->
+#+END_HTML
+* 代码
+
+#+BEGIN_SRC js
+  var slicePreOrder = function(oldPreorder,inorder){
+    // example: slicePreOrder([1,2,4,3,5,6,7],[2,5,4]) ==> [2,4,5]
+    var result = [];
+    if(inorder.length === 0){
+      return [];
+    }
+  
+    for(var i = 0;i < oldPreorder.length;i++){
+      if(inorder.indexOf(oldPreorder[i]) > -1){
+        result.push(oldPreorder[i]);
+      }
+    }
+    return result;
+  };
+
+  var buildTree = function(preorder, inorder) {
+    if(preorder.length === 0) return null;
+    if(preorder.length == 1){
+      return new TreeNode(preorder[0]);
+    }else{
+      var root = new TreeNode(preorder[0]);   // must be root
+      var inorder_left = inorder.slice(0,inorder.indexOf(preorder[0]));
+      var inorder_right = inorder.slice(inorder.indexOf(preorder[0]) + 1);
+
+      root.left = buildTree(slicePreOrder(preorder,inorder_left),inorder_left);
+      root.right = buildTree(slicePreOrder(preorder,inorder_right),inorder_right);
+      return root;
+    }
+  };
+#+END_SRC
+
+结果运行超时了。。
+
+* 改进
+由于 leetcode 不能 profile，只能猜测性能损失在过多次的数组复制上，改成只传递下标。
+
+同时，观察前序和中序遍历的结果，当我们找到根节点的时候，它在中序遍历中左边的节点是其左子树，假设此时左边节点数是 n，那么意味着前序遍历中根节点后面 n 个节点即为左子树的 n 个子节点（虽然顺序变了）。这样的话，上面的 =slicePreOrder= 也是没有必要的。右边同理。
+
+#+BEGIN_EXAMPLE
+       [preorder]
+  0       12       34
+  1       24       35
+   |   nl  |        |
+   +-------+        |
+   +----------------+
+          nl+nr
+
+       [inorder]
+   01      2      34
+   24      1      53
+   |  nl  | |  nr  |
+   +------+ +------+
+#+END_EXAMPLE
+
+这种方法并不复杂，但稍有不慎可能会搞错边界条件，所以可以画张简单的图对应（例如上面的 ASCII 图，感谢 =artist-mode= ）。多次对照后终于 Accepted
+
+#+BEGIN_SRC js
+  var find = function(array, start, end, item){
+      for(var i = start;i < end + 1;i++){
+           if(item == array[i]){
+               return i;
+           }
+      }
+      return -1;
+  }
+
+  var buildTreeIter = function(preorder, inorder, pstart, pend, istart, iend){
+
+      if(pend < pstart || pend > preorder.length || pstart > preorder.length || iend > inorder.length || istart > inorder.length){
+          return null;
+      }else if(pstart == pend){
+          return new TreeNode(preorder[pstart]);
+      }else{
+          var root = new TreeNode(preorder[pstart]);   // must be root
+          var rootIndex = find(inorder, istart, iend, preorder[pstart]);
+          var leftLen = rootIndex - istart;
+          var rightLen = iend - rootIndex;
+          root.left = buildTreeIter(preorder, inorder, pstart + 1, pstart + leftLen, istart, istart + leftLen - 1);
+          root.right = buildTreeIter(preorder,
+                                      inorder,
+                                      pstart + leftLen + 1,
+                                      pstart + leftLen + rightLen,
+                                      rootIndex + 1, 
+                                      rootIndex + rightLen);
+          return root;
+      }
+  };
+  var buildTree = function(preorder, inorder) {
+      if(preorder.length === 0)
+          return [];
+      return buildTreeIter(preorder, inorder, 0, preorder.length - 1, 0, inorder.length - 1);
+  };
+#+END_SRC
