@@ -29,7 +29,7 @@ hexo 下插入图片现在大概有几个方案
 
 ** 使用
 
-首先确认 ~_config.yml~ 中有 ~post_asset_folder: true~。
+首先确认 ~_config.yml~ 中有 ~post_asset_folder:true~ 。
 
 在 hexo 目录，执行
 #+BEGIN_SRC shell
