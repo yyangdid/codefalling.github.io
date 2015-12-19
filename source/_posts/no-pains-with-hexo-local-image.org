@@ -61,3 +61,5 @@ public/2015/10/18/MacGesture2-Publish
 #+BEGIN_SRC html
   <img src="MacGesture2-Publish/logo.jpg" alt="logo">
 #+END_SRC
+
+值得一提的是，这个插件对于 [[https://github.com/CodeFalling/hexo-renderer-org][CodeFalling/hexo-renderer-org]] 同样有效。
