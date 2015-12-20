@@ -68,3 +68,37 @@ Note: You can only move either down or right at any point in time.
   };
 #+END_SRC
 
+
+* 递归
+
+其实也可以用递归来实现，加上记忆表就可以解决性能问题。
+
+#+BEGIN_SRC js
+  /**
+   ,* @param {number[][]} grid
+   ,* @return {number}
+   ,*/
+
+  var memory;
+  function d(i, j, grid){
+    if(memory[[i,j]]){
+      return memory[[i,j]];
+    }
+    var result;
+    if(i === 0 && j === 0){
+      result = grid[i][j];
+    }else if(i === 0){
+      result = d(i,j-1,grid) + grid[i][j];
+    }else if(j === 0){
+      result = d(i-1,j,grid) + grid[i][j];
+    }else{
+      result = Math.min(d(i,j-1,grid) , d(i-1,j,grid)) + grid[i][j];
+    }
+    memory[[i,j]] = result;
+    return result;
+  }
+  var minPathSum = function(grid) {
+    memory = {}; // 清除 leetcode 的缓存
+    return d(grid.length - 1, grid[0].length - 1, grid);
+  };
+#+END_SRC
