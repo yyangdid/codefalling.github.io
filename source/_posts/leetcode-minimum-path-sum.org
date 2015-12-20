@@ -16,7 +16,9 @@ Note: You can only move either down or right at any point in time.
 
 在一个非负数的矩阵中，找出由左上角移动到右下角的和最小的路径，并返回和。（只能向右或向下移动）。
 
-
+#+BEGIN_HTML
+<!--more-->
+#+END_HTML
 * 分析
 
 #+BEGIN_EXAMPLE
@@ -65,3 +67,4 @@ Note: You can only move either down or right at any point in time.
     return d[m-1][n-1];
   };
 #+END_SRC
+
