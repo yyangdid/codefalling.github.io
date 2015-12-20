@@ -67,14 +67,23 @@ theme: hexo-theme-next
 
 # Deployment
 ## Docs: http://hexo.io/docs/deployment.html
-deploy:
-  type: git
-  repo:
-  branch: master
-  repo:
-    github: https://github.com/CodeFalling/codefalling.github.io,master
-    #gitcafe: git@gitcafe.com:falling/falling.git,gitcafe-pages
+#deploy:
+#  type: git
+#  repo:
+#  branch: master
+#  repo:
+#    github: https://github.com/CodeFalling/codefalling.github.io,master
+#    #gitcafe: git@gitcafe.com:falling/falling.git,gitcafe-pages
 
+deploy:
+  type: rsync
+  host: 45.78.35.116
+  user: root
+  root: /var/www/blog
+  port: 27137
+  delete: true # Default is true
+  verbose: true # Default is true
+  #ignore_errors: [true|false] # Default is false
 
 
 feed:

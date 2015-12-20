@@ -10,7 +10,6 @@
 
 这些问题使得我一度不愿意使用本地图片而选择用图床，但被移动运营商无耻的横条广告逼得打算上 https，图床只支持 http 就成了问题。
 
-
 #+BEGIN_HTML
 <!--more-->
 #+END_HTML
@@ -28,15 +27,16 @@ hexo 下插入图片现在大概有几个方案
 [[https://github.com/CodeFalling/hexo-asset-image][CodeFalling/hexo-asset-image]]
 
 ** 使用
-
 首先确认 ~_config.yml~ 中有 ~post_asset_folder:true~ 。
 
 在 hexo 目录，执行
+
 #+BEGIN_SRC shell
   npm install https://github.com/CodeFalling/hexo-asset-image --save
 #+END_SRC
 
 假设在
+
 #+BEGIN_EXAMPLE
 MacGesture2-Publish
 ├── apppicker.jpg
@@ -46,7 +46,6 @@ MacGesture2-Publish.md
 #+END_EXAMPLE
 
 这样的目录结构（目录名和文章名一致），只要使用 ~![logo](MacGesture2-Publish/logo.jpg)~ 就可以插入图片。
-
 生成的结构为
 
 #+BEGIN_EXAMPLE
