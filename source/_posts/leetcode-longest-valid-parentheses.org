@@ -17,7 +17,9 @@ Another example is ")()())", where the longest valid parentheses substring is "(
 ** 题意
 
 给一个由'('和')'组成的字符串，找出字符串中尽可能长的有效括号匹配的长度。例如 ")()(()()))"返回结果应该是 8 [()(()())]。
-
+#+BEGIN_HTML
+<!--more-->
+#+END_HTML
 * 分析
 本题可以从动态规划的思路出发，用 $d_i$ 表示到第 $i$ 个字符为结尾的字符的 "longest valid parentheses"。$n_i$ 表示第 $i$ 个字符，则有
 
