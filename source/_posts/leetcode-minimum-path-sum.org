@@ -1,7 +1,7 @@
 #+TITLE: [Leetcode]Minimum Path Sum
 #+DATE: <2015-12-20 Sun 20:48>
 #+LAYOUT: post
-#+TAGS: leetcode javascript
+#+TAGS: leetcode,javascript
 #+CATEGORIES: LEETCODE
 
 * 题目
