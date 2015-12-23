@@ -1,7 +1,7 @@
 #+TITLE: 摆脱 hexo-front-matter
 #+DATE: <2015-11-16 Mon 22:12>
 #+LAYOUT: post
-#+TAGS: emacs,hexo,org-mode,hexo-renderer-org
+#+TAGS: emacs,hexo,orgmode,hexo-renderer-org
 #+CATEGORIES: EMACS
 
 * hexo-front-matter
