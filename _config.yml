@@ -77,7 +77,7 @@ theme: hexo-theme-next
 
 deploy:
   type: rsync
-  host: 45.78.35.116
+  host: codefalling.com
   user: root
   root: /var/www/blog
   port: 27137
@@ -94,7 +94,21 @@ sitemap:
     path: sitemap.xml
 
 org:
-    common: '#+OPTIONS: toc:nil\n'
+    common: |
+            #+OPTIONS: toc:nil
+            #+BEGIN_HTML
+              <script>
+                function editAtGithub(isRaw){
+                  var url_parts = document.location.pathname.split('/');
+                  var postname = url_parts[url_parts.length - 2];
+                  var url = 'https://github.com/CodeFalling/codefalling.github.io/tree/source/source/_posts' + '/' + postname + '.org';
+                  if(isRaw)
+                    url = 'https://raw.githubusercontent.com/CodeFalling/codefalling.github.io/source/source/_posts' + '/' + postname + '.org';
+                  window.open(url);
+                }
+              </script>
+            #+END_HTML
+            #+BIND: org-html-postamble \"<a href='javascript: editAtGithub();'>Edit Me at Github</a> - <a href='javascript: editAtGithub(true)'>Org Source</a></br>Last Updated %d.</br>Created by %c</br>Render by <a href='https://github.com/CodeFalling/hexo-renderer-org'>hexo-renderer-org</a>\"
 
 # Theme
 
