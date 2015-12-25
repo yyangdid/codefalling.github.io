@@ -101,9 +101,15 @@ org:
                 function editAtGithub(isRaw){
                   var url_parts = document.location.pathname.split('/');
                   var postname = url_parts[url_parts.length - 2];
-                  var url = 'https://github.com/CodeFalling/codefalling.github.io/tree/source/source/_posts' + '/' + postname + '.org';
+                  if(url_parts.length == 3){ // is a page(wiki about etc)
+                    postname = postname + '/index.org';
+                  }else{
+                    postname = '_posts/' + postname + '.org';
+                  }
+
+                  var url = 'https://github.com/CodeFalling/codefalling.github.io/tree/source/source/' + postname;
                   if(isRaw)
-                    url = 'https://raw.githubusercontent.com/CodeFalling/codefalling.github.io/source/source/_posts' + '/' + postname + '.org';
+                    url = 'https://raw.githubusercontent.com/CodeFalling/codefalling.github.io/source/source/' + postname;
                   window.open(url);
                 }
               </script>
