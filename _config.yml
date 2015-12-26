@@ -114,7 +114,7 @@ org:
                 }
               </script>
             #+END_HTML
-            #+BIND: org-html-postamble \"<a href='javascript: editAtGithub();'>Edit Me at Github</a> - <a href='javascript: editAtGithub(true)'>Org Source</a></br>Last Updated %d.</br>Created by %c</br>Render by <a href='https://github.com/CodeFalling/hexo-renderer-org'>hexo-renderer-org</a>\"
+            #+BIND: org-html-postamble \"<a href='javascript: editAtGithub();'>Edit Me at Github</a> - <a href='javascript: editAtGithub(true)'>Org Source</a> - Last Updated %d.</br>Render by <a href='https://github.com/CodeFalling/hexo-renderer-org'>hexo-renderer-org</a> with %c\"
 
 # Theme
 
