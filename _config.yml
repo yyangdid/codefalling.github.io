@@ -63,7 +63,7 @@ pagination_dir: page
 # Extensions
 ## Plugins: http://hexo.io/plugins/
 ## Themes: http://hexo.io/themes/
-theme: hexo-theme-next
+theme: hexo-theme-clean
 
 # Deployment
 ## Docs: http://hexo.io/docs/deployment.html
@@ -126,3 +126,21 @@ social:
   GitHub: https://github.com/codefalling
   Twitter: https://twitter.com/codefalling
   ZhiHu: https://www.zhihu.com/people/falling-70
+
+theme_config:
+  # head
+  menu:
+    Home: /
+    Archives: /archives
+  rss: /atom.xml
+  favicon: /favicon.png
+  
+  # main
+  date_format: 'MMMM D, YYYY'
+  excerpt_link: READ MORE
+  comment_link: 0 COMMENTS
+  
+  # foot
+  # themes_mata: '❤ Theme by <a href="http://unmric.com"target="_blank">unmric</a>'
+  google_analytics:
+  
