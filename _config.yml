@@ -63,7 +63,7 @@ pagination_dir: page
 # Extensions
 ## Plugins: http://hexo.io/plugins/
 ## Themes: http://hexo.io/themes/
-theme: hexo-theme-clean
+theme: clean
 
 # Deployment
 ## Docs: http://hexo.io/docs/deployment.html
@@ -142,5 +142,5 @@ theme_config:
   
   # foot
   # themes_mata: '❤ Theme by <a href="http://unmric.com"target="_blank">unmric</a>'
-  google_analytics:
+  google_analytics: UA-72449503-1
   
