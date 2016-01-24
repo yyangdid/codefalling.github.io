@@ -11,6 +11,10 @@ Windows 是一个坚实可靠的操作系统，又有非常完善的软件生态
 * 效果
 这是运行在虚拟机里，但窗口却在 Windows 下的 emacs。
 [[file:unix-env-in-windows-with-vagrant/emacs-x11-forward.png]]
+
+#+BEGIN_HTML
+<!--more-->
+#+END_HTML
 * 工具
 ** VirtualBox
 VirtualBox 是一个知名的开源虚拟机，以前也曾尝试过直接使用 VirtualBox 在 Windows 下安装 Linux 虚拟机然后从 ssh 登录，但每次都要手动去配置文件共享，网络等问题非常烦人。
