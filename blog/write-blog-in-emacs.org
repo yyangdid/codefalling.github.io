@@ -1,0 +1,16 @@
+#+TITLE: 在 emacs 中写博客
+#+DATE: 2016-01-31
+#+TAGS: emacs, tools, blog, hexo, org-page
+
+* 背景
+在我以前的一篇文章：[[//codefalling.com/2015/11/17/org-octopress-with-hexo-org/][在 hexo-org 中使用 org-octopress]] 中，曾经介绍过把 org-octopress 的 UI 部分 hack 之后借给 hexo 使用。但 hack 的方式不够优雅，且支持的功能有限（几乎只有显示一个表格）。所以硬着头皮用几乎不会的 emacs-lisp + google 另写了一个包，就是 blog-admin。
+
+* blog-admin
+** 项目
+项目地址：https://github.com/CodeFalling/blog-admin
+** 预览
+[[https://cloud.githubusercontent.com/assets/5436704/12700452/1aa686ea-c81e-11e5-92c6-5cd5e810ba35.gif]]
+** 设计
+blog-admin 的设计是类似 WEB 开发的前后端分离，前端（ ~blog-admin.el~ ） 和后端（ ~blog-backend*.el~ ）分开，前端和界面相关，后端提供博客系统相关的操作，所以应该很容易就能加入其他博客系统的支持。
+** 使用
+安装和使用方式其实在 https://github.com/CodeFalling/blog-admin/blob/develop/README.org 里都已经写了，就不再重复。melpa 的审核目前还没有通过（因为貌似只有 purcell 一个人在维护），倒是意外发现 spacemacs 现在已经支持了 quelpa，可以很轻松的直接从 repo 安装package。

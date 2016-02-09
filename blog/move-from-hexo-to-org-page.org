@@ -1,0 +1,70 @@
+#+TITLE: 从 hexo 迁移到 org-page
+#+DATE: 2016-01-30
+#+TAGS: hexo, org-page
+
+* 背景
+之前一直羡慕于 hexo 有着大量精美的主题，所以特地给 hexo 写了 [[https://github.com/CodeFalling/hexo-renderer-org][hexo-renderer-org]] 插件让 hexo 支持 orgmode 的渲染。但由于 VPS 的速度实在不给力，带不动绚丽的 hexo 主题（恩我说的就是 Next），所以一直在找极简的 hexo 主题，但是一直没有找到让人满意的。倒是想起来 org-page 的主题非常精简（当初也就是因为这个原因没有使用），所以干脆迁移来了 org-page。
+
+* org-page
+[[https://github.com/kelvinh/org-page][org-page]] 是一个 pure-elisp 的静态博客生成器，因为没有 emacs 以外的外部依赖，所以非常的便捷， +而且可以给作为 emacs 党的我充值信仰+ ，从博客的编写到发布都不需要离开 emacs。也因为本身就是 elisp 程序，所以可以很轻松的调用 ~orgmode~ 来处理 org，相比之下 hexo-renderer-org 需要额外起 emacs 进程。org-page 本身也自带一套非常 geek 的 theme（当然几乎还没有其他类型的 theme）。
+
+* 迁移过程中的问题
+
+其实基本没有什么问题，因为 ~hexo-renderer-org~ 和 ~org-page~ 都是标准的 ~org~ ，没有加入自己的东西，我的文件几乎是原封不动的复制过来（包括文章同名文件夹和图片等）。
+
+** https
+org-page 默认的 theme 没有考虑 https 支持，很容易解决，把 theme 里的 ~http://~ 替换为 ~//~ 就行。已经提交了 PR 来修复默认主题的 https: https://github.com/kelvinh/org-page/pull/168
+
+** URL
+org-page 和 hexo 使用的 URL 规则并不相同，org-page 默认是 ~post/年/月/日/标题/~ ，而 hexo 则是 ~/年/月/日/文件名~ 。虽然 org-page 可以单独在文件中指定 URI，但是手动添加太麻烦，而且并不支持文件名（我读了具体的函数，参数里只传递了标题而没有文件名），所以需要做一些 hack。
+
+#+BEGIN_SRC emacs-lisp
+  (defun op/generate-force-hexo-uri (default-uri-template creation-date title)
+    "Generate URI like hexo"
+    (let ((uri-template (or (op/read-org-option "URI")
+                            default-uri-template))
+          (filename (f-no-ext (f-filename buffer-file-name))) ;; 因为在源码里读到这个函数执行的时候当前的 buffer 正好是 org，所以可以用 buffer-file-name 读到文件名
+          (date-list (split-string (if creation-date
+                                       (fix-timestamp-string creation-date)
+                                     (format-time-string "%Y-%m-%d"))
+                                   "-"))
+          (encoded-title (encode-string-to-url title)))
+      (format-spec uri-template `((?y . ,(car date-list))
+                                  (?m . ,(cadr date-list))
+                                  (?d . ,(caddr date-list))
+                                  (?t . ,filename)))))
+
+
+  (setq op/category-config-alist
+        '(("blog" ;; this is the default configuration
+           :show-meta t
+           :show-comment t
+           :uri-generator op/generate-force-hexo-uri ;; 覆盖原来的 url 生成函数
+           :uri-template "/%y/%m/%d/%t/" ;; hexo 的 url 中不出现 category
+           :sort-by :date     ;; how to sort the posts
+           :category-index t) ;; generate category index or not
+          ("index"
+           :show-meta nil
+           :show-comment nil
+           :uri-generator op/generate-uri
+           :uri-template "/"
+           :sort-by :date
+           :category-index nil)
+          ("about"
+           :show-meta nil
+           :show-comment nil
+           :uri-generator op/generate-uri
+           :uri-template "/about/"
+           :sort-by :date
+           :category-index nil)))
+#+END_SRC
+
+偷懒记不住 emacs 本身的 API，所以用了 https://github.com/rejeep/f.el 来去拓展名，如果提示 ~f-no-ext~ 的话可能需要安装并且 ~(require 'f)~ ，或者用 emacs API 替代。
+
+** rss
+rss 变成了 ~rss.xml~ 。昂。。看了下是写死在代码里的（关键同时还写死在了模板的代码里，不像 elisp 那么好修改），于是似乎没有什么好办法。
+
+* 其他
+最近写了个用来写博客的 emacs 插件，操作界面和博客分离，理论上可以很轻松的加入各种博客的支持：https://github.com/CodeFalling/blog-admin。
+
+目前已经支持了 hexo（包括 orgmode 和 markdown，甚至混着用）和 org-page。由于暂时还没有通过 melpa 的审核所以不过多介绍，等审核通过后来写具体的介绍。

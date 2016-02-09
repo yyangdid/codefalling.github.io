@@ -1,0 +1,68 @@
+#+TITLE: Generate Parentheses
+#+DATE: 2015-11-05
+#+TAGS: leetcode
+#+LAYOUT: post
+#+CATEGORIES: LEETCODE
+
+* 原题
+
+Given n pairs of parentheses, write a function to generate all combinations of well-formed parentheses.
+
+For example, given n = 3, a solution set is:
+
+"((()))", "(()())", "(())()", "()(())", "()()()"
+
+** 翻译
+给出 n 组括号的所有组合。
+
+* 分析
+
+乍一看还是有难度的，把图画出来会清晰的多。
+
+#+BEGIN_EXAMPLE
+
+       +--- (( ---- 
+       |
+  ( ---+          +--- ()(
+       |          |       
+       +--- () ---+       
+                  |       
+                  +--- ())X
+#+END_EXAMPLE
+
+很明显寻找组合的过程就像遍历一棵树，用递归可以很轻松的完成。
+
+例如寻找 n 组括号的组合，即一共放置 n 个坐括号和 n 个右括号。每到一个节点，都有两种选择，放置左括号或右括号（右括号不能放的比左括号多，否则一定无法完成匹配）。放置括号的顺序和调用递归函数的顺序一致（即和回溯方向相反）。
+
+#+BEGIN_HTML
+<!--more-->
+#+END_HTML
+
+* 代码
+
+#+BEGIN_SRC js
+  /**
+   ,* @param {number} n
+   ,* @return {string[]}
+   ,*/
+
+  var result = [];
+  var iter = function(left, right, current){
+    if(left === 0 && right === 0){
+      result.push(current);
+      return;
+    }else{
+      if(left > 0){
+        iter(left - 1, right, current + '('); // 放左括号
+      }
+      if(right > 0 && right > left){
+        iter(left, right-1, current + ')'); // 放右括号
+      }
+    }
+  }
+  var generateParenthesis = function(n) {
+    result = [];  // 这一行是必须的，在 Leetcode 里 js 的 test case 居然共用全局变量
+    iter(n, n, "");
+    return result;
+  };
+#+END_SRC

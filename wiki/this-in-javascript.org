@@ -1,0 +1,75 @@
+#+TITLE: Javascript 中的 this
+#+DATE: 2016-02-05
+#+TAGS: javascript, wiki
+
+* this
+
+~this~ 在 OOP 编程语言中是个非常重要的关键字，但在 JavaScript 中的表现却和主流语言不太一样，它是在每次函数调用时被传递给函数的。
+
+* 调用模式
+
+JavaScript 中有四种调用模式
+
+** 方法调用
+   当一个调用表达式中有一个属性存取表达式时（例如 ~obj.fun()~ ），它被作为一个方法来调用， ~this~ 直到调用时被绑定到 ~obj~ 。
+
+#+BEGIN_SRC js
+  var obj = {
+      a: 10,
+      inside: function(){
+          return this.a + 20;
+      }
+  };
+
+  function outside(){
+      return this.a;
+  }
+
+  obj.inside();             // => 30
+  obj.outside = outside;
+  obj.outside();            // => 10
+#+END_SRC
+
+** 函数调用模式
+   当函数直接被调用时， ~this~ 绑定到全局对象。继续使用上面代码的 ~outside~ ：
+
+#+BEGIN_SRC js
+  var a = "public";
+  outside();         // "public"
+#+END_SRC
+
+** 构造器调用模式
+   当函数调用前存在 ~new~ 时，被视为调用构造器，会创造出一个 ~prototype~ 指向该函数 ~prototype~ 的新对象，同时 ~this~ 将被绑定到该对象。
+
+#+BEGIN_SRC js
+  var a = "outside";
+  function Obj(){
+    this.a = "inside";
+  }
+  Obj.prototype.inside = function(){
+    return a;
+  }
+
+  var obj = new Obj();      // Obj 中 this 将会被绑定到 obj
+  obj.inside();             // "inside", 通过原型链的方法调用
+  var outside = obj.inside;
+  outside();                // 函数调用
+#+END_SRC
+
+** apply 调用
+~apply~ 允许我们构造一个数组作为参数列表，并指定 ~this~ 来调用一个函数。
+
+#+BEGIN_SRC js
+  var a = 10000;
+  var obj = {
+    a: 10
+  };
+
+  function outside(x, y){
+    return this.a + x + y;
+  }
+
+  outside.apply(obj, [10, 20]);    // 40
+  outside.apply(null, [10, 20]);   // 10030
+
+#+END_SRC

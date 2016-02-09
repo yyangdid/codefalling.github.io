@@ -1,0 +1,210 @@
+#+TITLE: cleanjs（一）：词法分析
+#+DATE: 2015-11-07
+#+TAGS: project, cleanjs
+#+LAYOUT: post
+#+CATEGORIES: PROJECT
+
+
+* cleanjs
+
+这是我最近新开的坑，前段时间搞了好几个实用型但是没什么太多技术含量的项目，于是现在也想搞一个没什么卵用但是比较高端的东西。 **实现 js 的一个子集** 。先用 js 写一个解释器（或者代码生成器？），最终目标是尝试用这个解释器来完成自举（所以我会尽量不使用不打算实现的 js 特性）。
+
+这样设计有很多好处，例如尝试自举时我不需要重头再写一遍（如果有那么一天的话），我可以依旧在 emacs 的 =js-mode= 下写 =cleanjs= 的代码而不需要自己造一个 mode。当然缺点也是非常明显的，例如造一个 cleanjs->js 的 compiler 实在是太没有什么卵用了。。所以也许我会考虑生成其他语言（例如 c）的代码。
+
+* 词法分析
+
+Tokenizer 也是经常见到的一个梗，相传经常有程序员以此约战 Github 之巅（雾）：[[http://www.zhihu.com/question/30746665][会写 Parser、Tokenizer 是什么水平？ - 知乎]] 。
+
+好了不扯淡，词法分析是语言实现的第一步，也是最容易实现的，也是我唯一有信心实现能实现的（咳）。要做的不复杂，只要将给的代码中相应的 token 抽取出来，例如给一段 =cleanjs= 的代码：
+
+#+BEGIN_SRC js
+  var name = "hahaha\n";
+  for (var i = 0; i++; i<10){
+    console.log(name + i);
+  }
+#+END_SRC
+
+应该得到一个 token 流：
+
+| src        | token                                 | 含义                                                          |
+|------------+---------------------------------------+---------------------------------------------------------------|
+| var        | ={type: 'keyword', value: 'var'}=     | 关键字(if else while for var function return null true false) |
+| =          | ={type: 'op', value: '='}=            | 运算符(+-*/.,)                                                |
+| "hahaha\n" | ={type: 'string', value: 'hahaha\n'}= | 字符串                                                        |
+| ;          | ={type: 'punc', value: ';'}=          | 标点（:;(){}）                                                |
+| for        | ={type: 'keyword', value: 'for'}=     | 关键字                                                        |
+| ...        | ...                                   |                                                               |
+
+#+BEGIN_HTML
+<!--more-->
+#+END_HTML
+* InputStream
+
+在构造一个词法分析流之前，我们先构建一个输入流来隐藏一些细节，例如应该怎么换行，目前的位置等等
+
+#+BEGIN_SRC js
+  function InputStream(input){
+    var _pos = 0, _line = 0, _col = 0, _input = input;
+
+    return {
+      next: next,
+      peek: peek,
+      eof: eof,
+      throwerr: throwerr,
+      lookup_next: lookup_next,
+      get_line: get_line,
+      get_col: get_col
+    };
+
+    function get_line(){
+      return _line;
+    }
+
+    function get_col(){
+      return _col;
+    }
+
+    function next(){
+      var ch = _input.charAt(_pos++);
+      if(ch == '\n'){
+        _line ++;
+        _col = 0;
+      }else{
+        _col ++;
+      }
+      return ch;
+    }
+
+    function lookup_next(){
+      var ch = _input.charAt(_pos + 1);
+      if(ch == ''){
+        return null;
+      }else{
+        return ch;
+      }
+    }
+
+    function peek(){
+      return _input.charAt(_pos);
+    }
+
+    function eof(){
+      return peek() == '';
+    }
+
+    function throwerr(msg){
+      throw new Error(`[${_line}:${_col}]${msg}`);
+    }
+  };
+#+END_SRC
+
+利用函数闭包可以轻松构出封装的效果，外部能够访问的只有 return 里的接口，使用 =InputStream()= 就可以创建一个实例。
+
+| 函数          | 作用                                                                               |
+|---------------+------------------------------------------------------------------------------------|
+| next()        | 返回当前位置的字符，并向后移动，封装了换行的逻辑（即读到 \n 时行号列号会自动变化） |
+| peek()        | 返回当前位置的字符                                                                 |
+| eof()         | 检测是否到达末尾                                                                   |
+| throwerr()    | 抛出异常，并且输出相应的行号列号                                                   |
+| lookup_next() | 返回下一个字符，并不移动位置                                                       |
+
+本来设计得当的话 =lookup_next()= 这个方法本来是可以不需要的，但是既然是实现 js 的子集就避免不了。例如你在读进一个 =/= 时，必须知道下一个字符是 =/= 还是 =*= 或者其他的字符，才能确切的判断它是块注释，行注释还是除法运算符。
+* TokenStream
+
+=TokenStream= 其实和 =InputStream= 非常的相似，区别在于它的输入是 =InputStream= ,而输出的是 Token。
+
+=TokenStream= 的核心在于读取下一个 =token= , 流程大概是
+
++ 去除所有的制表符号
++ 如果到达末尾，则返回 null
++ 如果以 =\\= 或者 =\*= 则跳过注释并读取下一个 token
++ 如果以 =双引号= 或者 =单引号= 开头的，则读取字符串
++ 。。。等等等
++ 如果上面都不满足，则报错
+
+
+实现大概如下
+#+BEGIN_SRC js
+  function read_next() {
+    read_while(is_whitespace);
+    var result;
+    var info = create_info();
+    if (_input_stream.eof()) {
+      return null;
+    }
+    var ch = _input_stream.peek();
+    if (is_comment_start(ch)) {
+      skip_comment();
+      result = read_next();
+    }
+    else if (is_op_char(ch)) result = read_op();
+    else if (is_string_start(ch)) result = read_string();
+    else if (is_id_start(ch)) result = read_id_or_keyword();
+    else if (is_punc(ch)) result = read_punc();
+    else if (is_number_start(ch)) result = read_number();
+    else _input_stream.throwerr(`Can't handle character: ${ch}`);
+    result.info = info;
+    return result;
+  }
+#+END_SRC
+
+大部分的 =readxxx= 都容易实现， =string= 稍微麻烦一点要支持转义和多种字符串
+
+因为 js 支持三种字符串的写法，同时要识别转义字符
+
+#+BEGIN_SRC js
+  var str1 = 'this is a string with \'';
+  var str2 = "this is a string with \"";
+  var str3 = `this is a string with \``;
+#+END_SRC
+
+大致的实现如下
+
+#+BEGIN_SRC js
+  function read_escaped(end) {
+    var escaped = false;
+    var str = '';
+    _input_stream.next();
+    while (!_input_stream.eof()) {
+      var ch = _input_stream.next();
+      if (escaped) {
+        if(ch == 'n'){
+          str += '\n';
+        }else{
+          str += ch;
+        }
+        escaped = false;
+      } else if (ch == "\\") {
+        escaped = true;
+      } else if (ch == end) {
+        break;
+      } else {
+        str += ch;
+      }
+    }
+    return str;
+  }
+
+  function read_string() {
+    var type;
+    var begin = _input_stream.peek();
+    if(begin == '`')
+      type = 'es6_string';
+    else
+      type = 'string';
+    return {
+      type: type,
+      value: read_escaped(begin) // begin with ' or " or `
+    };
+  }
+
+#+END_SRC
+
+这里实现的并不完整，只支持几个简单的转义字符，由于具体的代码比较长，可以直接见：[[https://github.com/CodeFalling/cleanjs/blob/master/src/lex.js][cleanjs/lex.js at master · CodeFalling/cleanjs]] 。
+* 运行效果
+
+[[http://7xnx2x.com1.z0.glb.clouddn.com/cleanjs_tokenizer_sample.png][例子]]
+
+* 参考
+
+本文大量参（zhao）考（ban）了 [[http://lisperator.net/pltut/][How to implement a programming language (tutorial for beginners)]] 的内容，这是一个讲如何用 js 实现编程语言的网站，当然和我的目标不同，它是实现一个新的语言而不是 js 的子集。
