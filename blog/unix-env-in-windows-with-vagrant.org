@@ -37,3 +37,22 @@ Vagrant 是个非常棒的解决方案，依托于 VirtualBox 可以提供非常
 + 完整的 Linux 环境，而不是各种残缺不全的模拟，这意味着很多
 + 原来 Linux GUI 下的东西居然也能通过 X11 forward 完美工作，这点让我很惊喜，例如 ~fcitx-remote~ 在 Windows 下目前还没有等价的替代品，而如此一来完全可以无障碍的使用
 + 同样完整的 Windows 环境，Windows 就不用多说了，丰富的桌面软件，和硬件的契合度，以及各种游戏
+
+
+* box
+
+  之前有小伙伴让我展开写一写具体的过程，但是一直拖着没写，因为具体的操作中还是会碰到不同的问题，而且流水帐也没有什么意义，后来想到不如干脆封一个 vagrant box。vagrant 的意义也在于次，环境一个人折腾一次就够了，然后直接分发出去。
+
+主要的特点有
++ 基于 ubuntu/trusty
++ 换了 163 源，时区是中国时区
++ 从 ppa 安装了 emacs-snapshot (25.1.50.2)
++ 从 ppa 安装了 fcitx , 配置了 google-pinyin 和 cloud-pinyin，需要修改配置的自己从命令行启动 fcitx-configtools
++ 在 home 目录放了一个 emacs-with-fcitx 脚本可以用来先启动 fcitx -d 再启动 emacs
++ 默认用户是 vagrant,密码同 vagrant，默认转发 sshd 到主机的 2222 端口，所以通过 mobaxterm ssh 到 vagrant@127.0.0.1:2222 就行
+
+需要科学上网的同学可以设置 ~host-only~ 网络，然后通过 ~proxychains~ 访问宿主机的 ~ss~ (打开局域网访问)。VPN 的使用不是很了解，待补充。
+
+box 传到了百度网盘上也省得翻墙，至于如何使用 box 如何使用 vagrant 之类的我是不会写的-。-搜一下应该有很多，有问题欢迎反馈。
+
+下载网址：http://pan.baidu.com/s/1skxhmSd
